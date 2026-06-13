@@ -1,6 +1,6 @@
 function doGet(e) {
   // Ganti dengan ID Spreadsheet Anda yang bisa didapatkan dari URL Spreadsheet
-  var sheetId = '1lrk1JFZwxoxiwfjOyoMsGQ65tvp5swtIHjkMU-Vd6s4'; 
+  var sheetId = '1FYM2Th8Tgu-5bIq4Ec9IA8iLNDMfHphy6Z9iveSubPY'; 
   
   // Mengambil sheet pertama (tab paling kiri) secara otomatis
   var sheet = SpreadsheetApp.openById(sheetId).getSheets()[0];
