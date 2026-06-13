@@ -481,7 +481,9 @@
                     <select id="add-status" class="form-control">
                         <option value="BELUM LUNAS">BELUM LUNAS</option>
                         <option value="LUNAS">LUNAS</option>
-                        <option value="LUNAS DROP LAGI">LUNAS DROP LAGI</option>
+                        <option value="BERHENTI">BERHENTI</option>
+                        <option value="ISTIRAHAT">ISTIRAHAT</option>
+                        <option value="BERJALAN">BERJALAN</option>
                     </select>
                 </div>
             </div>
@@ -493,8 +495,9 @@
 
         <!-- 4. Result Card -->
         <div class="result-card" id="result-card">
-            <div class="result-header">
-                <h3>Informasi Peminjam</h3>
+            <div class="result-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; padding: 0; border: none;">Informasi Peminjam</h3>
+                <button class="btn btn-secondary" id="btn-edit-data" style="width: auto; padding: 6px 12px; font-size: 12px; height: auto;">Edit Data</button>
             </div>
             <div class="result-body">
                 <div class="data-row">
@@ -540,7 +543,7 @@
         // KONFIGURASI GOOGLE APPS SCRIPT URL
         // Ganti URL di bawah ini dengan URL Deployment Web App Apps Script Anda
         // ==============================================================================
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbweRQDC5wTzENW_Mm3qmYLbVe505i0fGjeErtqMgJ4VjmwDBBerWRedkWkw6f8t3XE/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyNgmdVe2bVfOuxYSg3WuZCSCIVgJTCqUYkrpRT1ylOCJ2bCXINElydatS1QAYgfGw/exec';
 
         // DOM Elements
         const fileInput = document.getElementById('ktp-upload');
@@ -558,6 +561,9 @@
         const addForm = document.getElementById('add-form');
         const btnCancelAdd = document.getElementById('btn-cancel-add');
         const btnSubmitAdd = document.getElementById('btn-submit-add');
+        const btnEditData = document.getElementById('btn-edit-data');
+
+        let isEditMode = false;
 
         const elNama = document.getElementById('res-nama');
         const elNik = document.getElementById('res-nik');
@@ -676,6 +682,7 @@
                     
                     // Coba format tanggal jika datanya berupa ISO String
                     let tglText = p.tanggal;
+                    let rawDate = '';
                     if(tglText) {
                         try {
                             const d = new Date(tglText);
@@ -684,22 +691,38 @@
                                 tglText = d.toLocaleDateString('id-ID', {
                                     day: '2-digit', month: 'long', year: 'numeric'
                                 });
+                                rawDate = d.toISOString().split('T')[0]; // Format yyyy-mm-dd
                             }
                         } catch(e){}
                     }
                     elTanggal.textContent = tglText || '-';
+                    elTanggal.dataset.raw = rawDate;
                     
                     elAlamat.textContent = p.alamat || '-';
                     elHp.textContent = p.no_hp || '-';
-                    elStatus.textContent = p.status || '-';
+                    
+                    const statusStr = String(p.status).toUpperCase().trim();
+                    elStatus.textContent = statusStr || '-';
 
                     // Update UI Status Badge
-                    if(String(p.status).toLowerCase() === 'lunas') {
-                        elStatus.style.backgroundColor = '#D1FAE5'; // emerald-100
-                        elStatus.style.color = '#059669'; // emerald-600
+                    if (statusStr === 'LUNAS') {
+                        elStatus.style.backgroundColor = '#D1FAE5'; // Hijau
+                        elStatus.style.color = '#059669';
+                    } else if (statusStr === 'BELUM LUNAS') {
+                        elStatus.style.backgroundColor = '#FFEDD5'; // Oranye
+                        elStatus.style.color = '#C2410C';
+                    } else if (statusStr === 'BERHENTI' || statusStr === 'BHT') {
+                        elStatus.style.backgroundColor = '#FEE2E2'; // Merah
+                        elStatus.style.color = '#DC2626';
+                    } else if (statusStr === 'ISTIRAHAT') {
+                        elStatus.style.backgroundColor = '#FEF9C3'; // Kuning
+                        elStatus.style.color = '#A16207';
+                    } else if (statusStr === 'BERJALAN') {
+                        elStatus.style.backgroundColor = '#DBEAFE'; // Biru
+                        elStatus.style.color = '#1D4ED8';
                     } else {
-                        elStatus.style.backgroundColor = '#FEE2E2'; // red-100
-                        elStatus.style.color = '#DC2626'; // red-600
+                        elStatus.style.backgroundColor = '#F3F4F6'; // Abu-abu default
+                        elStatus.style.color = '#374151';
                     }
 
                     resultCard.style.display = 'block';
@@ -732,11 +755,45 @@
         }
 
         btnShowAddForm.addEventListener('click', () => {
+            isEditMode = false;
+            document.querySelector('.add-form h3').textContent = 'Tambah Data Peminjam Baru';
             notFoundAction.style.display = 'none';
             alertError.style.display = 'none';
             document.getElementById('add-nik').value = nikInput.value.trim();
             addForm.style.display = 'block';
         });
+
+        if (btnEditData) {
+            btnEditData.addEventListener('click', () => {
+                isEditMode = true;
+                document.querySelector('.add-form h3').textContent = 'Edit Data Peminjam';
+                
+                // Isi form dengan data yang sudah ada
+                document.getElementById('add-nik').value = elNik.textContent !== '-' ? elNik.textContent : '';
+                document.getElementById('add-nama').value = elNama.textContent !== '-' ? elNama.textContent : '';
+                document.getElementById('add-resot').value = elResot.textContent !== '-' ? elResot.textContent : '';
+                document.getElementById('add-anggota-hari').value = elAnggotaHari.textContent !== '-' ? elAnggotaHari.textContent : '';
+                document.getElementById('add-tanggal').value = elTanggal.dataset.raw || '';
+                document.getElementById('add-hp').value = elHp.textContent !== '-' ? elHp.textContent : '';
+                document.getElementById('add-alamat').value = elAlamat.textContent !== '-' ? elAlamat.textContent : '';
+                
+                // Set status
+                const currentStatus = elStatus.textContent !== '-' ? elStatus.textContent.toUpperCase() : 'BELUM LUNAS';
+                const statusSelect = document.getElementById('add-status');
+                
+                let foundOption = false;
+                for(let i=0; i<statusSelect.options.length; i++) {
+                    if(statusSelect.options[i].value === currentStatus) {
+                        statusSelect.selectedIndex = i;
+                        foundOption = true; break;
+                    }
+                }
+                if(!foundOption) statusSelect.value = 'BELUM LUNAS';
+
+                resultCard.style.display = 'none';
+                addForm.style.display = 'block';
+            });
+        }
 
         btnCancelAdd.addEventListener('click', () => {
             resetAddForm();
@@ -760,7 +817,7 @@
             }
 
             const params = new URLSearchParams({
-                action: 'add',
+                action: isEditMode ? 'edit' : 'add',
                 nik: payload.nik,
                 nama: payload.nama,
                 resot: payload.resot,
@@ -779,7 +836,7 @@
                 const data = await response.json();
 
                 if(data.status === 'success') {
-                    showAlert('success', 'Data peminjam berhasil ditambahkan!');
+                    showAlert('success', isEditMode ? 'Data peminjam berhasil diperbarui!' : 'Data peminjam berhasil ditambahkan!');
                     resetAddForm();
                     // trigger search again to show the card
                     btnSearch.click(); 

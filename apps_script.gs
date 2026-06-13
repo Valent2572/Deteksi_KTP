@@ -90,4 +90,50 @@ function doGet(e) {
     
     return output;
   }
+  else if (action === 'edit') {
+    try {
+      var nikToEdit = e.parameter.nik;
+      var edited = false;
+      
+      for (var i = 1; i < data.length; i++) {
+        var sheetNik = String(data[i][5]).replace(/[^0-9]/g, '');
+        var searchNik = String(nikToEdit).replace(/[^0-9]/g, '');
+        
+        if (sheetNik === searchNik && searchNik !== '') {
+          var rowToEdit = i + 1; // +1 karena index array mulai dari 0, row google sheet mulai dari 1
+          
+          if(e.parameter.resot !== undefined) sheet.getRange(rowToEdit, 2).setValue(e.parameter.resot);
+          if(e.parameter.anggota_hari !== undefined) sheet.getRange(rowToEdit, 3).setValue(e.parameter.anggota_hari);
+          if(e.parameter.tanggal !== undefined) sheet.getRange(rowToEdit, 4).setValue(e.parameter.tanggal);
+          if(e.parameter.nama !== undefined) sheet.getRange(rowToEdit, 5).setValue(e.parameter.nama);
+          // Kolom 6 adalah NIK, kita tidak ubah karena ini adalah kuncinya.
+          if(e.parameter.alamat !== undefined) sheet.getRange(rowToEdit, 7).setValue(e.parameter.alamat);
+          if(e.parameter.no_hp !== undefined) sheet.getRange(rowToEdit, 8).setValue(e.parameter.no_hp);
+          if(e.parameter.status !== undefined) sheet.getRange(rowToEdit, 9).setValue(e.parameter.status);
+          
+          edited = true;
+          break;
+        }
+      }
+      
+      if (edited) {
+        output.setContent(JSON.stringify({
+          status: 'success',
+          message: 'Data peminjam berhasil diperbarui.'
+        })).setMimeType(ContentService.MimeType.JSON);
+      } else {
+        output.setContent(JSON.stringify({
+          status: 'error',
+          message: 'Data NIK tidak ditemukan untuk diedit.'
+        })).setMimeType(ContentService.MimeType.JSON);
+      }
+    } catch (err) {
+      output.setContent(JSON.stringify({
+        status: 'error',
+        message: 'Gagal mengedit data: ' + err.toString()
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    return output;
+  }
 }
