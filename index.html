@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin Koperasi</title>
+    <!-- Modern Typography: Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tesseract.js via CDN for lightweight OCR -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <style>
+        /* Design System / Variables */
+        :root {
+            --primary: #4F46E5;        /* Indigo 600 */
+            --primary-hover: #4338CA;  /* Indigo 700 */
+            --bg-color: #F9FAFB;       /* Gray 50 */
+            --card-bg: #FFFFFF;        
+            --text-main: #111827;      /* Gray 900 */
+            --text-muted: #6B7280;     /* Gray 500 */
+            --border-color: #E5E7EB;   /* Gray 200 */
+            --success: #10B981;        /* Emerald 500 */
+            --danger: #EF4444;         /* Red 500 */
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 650px;
+            padding: 40px;
+            position: relative;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+            letter-spacing: -0.025em;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 32px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #FAFAFA;
+        }
+
+        .drop-zone:hover {
+            border-color: var(--primary);
+            background-color: #F5F7FF;
+        }
+
+        .drop-zone svg {
+            color: var(--primary);
+            margin-bottom: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .drop-zone:hover svg {
+            transform: scale(1.1);
+        }
+
+        .drop-zone p {
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .drop-zone span.sub-text {
+            display: block;
+            font-size: 12px;
+            color: #9CA3AF;
+            margin-top: 6px;
+        }
+
+        input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .preview-container {
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 8px;
+            display: none;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 24px 0;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .divider::before { margin-right: .5em; }
+        .divider::after { margin-left: .5em; }
+
+        /* Input Form */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            background-color: #FAFAFA;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        /* Button */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+
+        .btn:disabled {
+            background-color: #9CA3AF;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Alerts */
+        .alert {
+            display: none;
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-top: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .alert.error {
+            background-color: #FEF2F2;
+            color: var(--danger);
+            border: 1px solid #FECACA;
+        }
+
+        .alert.success {
+            background-color: #ECFDF5;
+            color: var(--success);
+            border: 1px solid #A7F3D0;
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 24px;
+        }
+
+        .spinner {
+            border: 3px solid rgba(79, 70, 229, 0.1);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border-left-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 12px;
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Result Card */
+        .result-card {
+            display: none;
+            margin-top: 32px;
+            background-color: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .result-header {
+            background-color: #F8FAFC;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .result-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .result-body {
+            padding: 0;
+        }
+
+        .data-row {
+            display: flex;
+            padding: 14px 20px;
+            border-bottom: 1px solid #F3F4F6;
+        }
+
+        .data-row:last-child {
+            border-bottom: none;
+        }
+
+        .data-label {
+            flex: 0 0 140px;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .data-value {
+            flex: 1;
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 14px;
+            word-break: break-word;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container { padding: 24px; }
+            .data-row { flex-direction: column; }
+            .data-label { margin-bottom: 4px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Dashboard Admin Koperasi</h1>
+            <p>Sistem Pencarian Data Peminjam Berbasis NIK</p>
+        </div>
+
+        <!-- 1. Input Foto/Kamera -->
+        <div class="upload-section">
+            <div class="drop-zone" id="drop-zone">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                <p>Ambil Foto KTP / Unggah Gambar</p>
+                <span class="sub-text">Sistem akan otomatis mengekstrak NIK</span>
+            </div>
+            <!-- accept image and capture environment for mobile camera -->
+            <input type="file" id="ktp-upload" accept="image/*" capture="environment">
+            
+            <div class="preview-container">
+                <img id="image-preview" class="preview-image" alt="Preview KTP" />
+            </div>
+        </div>
+
+        <div class="divider">ATAU</div>
+
+        <!-- 2. Input Manual -->
+        <div class="form-group">
+            <label for="nik-input">Masukkan NIK Secara Manual</label>
+            <input type="text" id="nik-input" class="form-control" placeholder="Ketik 16 Digit NIK di sini..." maxlength="16">
+        </div>
+
+        <!-- 3. Action Button -->
+        <button class="btn" id="btn-search">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            Cari Data Peminjam
+        </button>
+
+        <!-- Loading / Status -->
+        <div class="loading" id="loading-indicator">
+            <div class="spinner"></div>
+            <p class="loading-text" id="loading-msg">Memproses...</p>
+        </div>
+
+        <!-- Alerts -->
+        <div class="alert error" id="alert-error"></div>
+        <div class="alert success" id="alert-success"></div>
+
+        <!-- 4. Result Card -->
+        <div class="result-card" id="result-card">
+            <div class="result-header">
+                <h3>Informasi Peminjam</h3>
+            </div>
+            <div class="result-body">
+                <div class="data-row">
+                    <div class="data-label">Nama Lengkap</div>
+                    <div class="data-value" id="res-nama">-</div>
+                </div>
+                <div class="data-row">
+                    <div class="data-label">NIK</div>
+                    <div class="data-value" id="res-nik">-</div>
+                </div>
+                <div class="data-row">
+                    <div class="data-label">Resort</div>
+                    <div class="data-value" id="res-resot">-</div>
+                </div>
+                <div class="data-row">
+                    <div class="data-label">Hari Anggota</div>
+                    <div class="data-value" id="res-anggota-hari">-</div>
+                </div>
+                <div class="data-row">
+                    <div class="data-label">Tanggal Pinjaman</div>
+                    <div class="data-value" id="res-tanggal">-</div>
+                </div>
+                <div class="data-row">
+                    <div class="data-label">Alamat</div>
+                    <div class="data-value" id="res-alamat">-</div>
+                </div>
+                <div class="data-row">
+                    <div class="data-label">Nomor HP</div>
+                    <div class="data-value" id="res-hp">-</div>
+                </div>
+                <div class="data-row">
+                    <div class="data-label">Status</div>
+                    <div class="data-value">
+                        <span id="res-status" style="display: inline-block; padding: 4px 10px; background-color: #E0E7FF; color: var(--primary); border-radius: 999px; font-size: 12px;">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==============================================================================
+        // KONFIGURASI GOOGLE APPS SCRIPT URL
+        // Ganti URL di bawah ini dengan URL Deployment Web App Apps Script Anda
+        // ==============================================================================
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyuMRhy5IlWYLEEl8SshI8gpkEPaDclwwgWsFdyehmRYebRHJbf8j2Uo6OTY0SZV4c/exec';
+
+        // DOM Elements
+        const fileInput = document.getElementById('ktp-upload');
+        const imagePreview = document.getElementById('image-preview');
+        const nikInput = document.getElementById('nik-input');
+        const btnSearch = document.getElementById('btn-search');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const loadingMsg = document.getElementById('loading-msg');
+        const alertError = document.getElementById('alert-error');
+        const alertSuccess = document.getElementById('alert-success');
+        const resultCard = document.getElementById('result-card');
+
+        const elNama = document.getElementById('res-nama');
+        const elNik = document.getElementById('res-nik');
+        const elResot = document.getElementById('res-resot');
+        const elAnggotaHari = document.getElementById('res-anggota-hari');
+        const elTanggal = document.getElementById('res-tanggal');
+        const elAlamat = document.getElementById('res-alamat');
+        const elHp = document.getElementById('res-hp');
+        const elStatus = document.getElementById('res-status');
+
+        // FITUR OCR: Mengunggah KTP
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // 1. Tampilkan Preview Gambar
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                imagePreview.src = event.target.result;
+                imagePreview.style.display = 'inline-block';
+            };
+            reader.readAsDataURL(file);
+
+            // Reset state
+            hideAlerts();
+            resultCard.style.display = 'none';
+            nikInput.value = '';
+            
+            showLoading("Memindai foto KTP (OCR)...");
+            btnSearch.disabled = true;
+
+            try {
+                // 2. Eksekusi OCR dengan Tesseract.js
+                // Bahasa Indonesia 'ind', gunakan worker default
+                const result = await Tesseract.recognize(file, 'ind');
+                const text = result.data.text;
+                console.log("Teks Terdeteksi:", text);
+
+                // 3. Cari pola 16 digit angka menggunakan Regex
+                // Membersihkan teks dari spasi berlebih atau karakter aneh yang nempel
+                const cleanText = text.replace(/[^0-9]/g, ''); 
+                
+                let foundNik = '';
+                
+                // Cari angka 16 digit utuh (dipisah whitespace)
+                const exactMatch = text.match(/\b\d{16}\b/);
+                
+                if (exactMatch) {
+                    foundNik = exactMatch[0];
+                } else if (cleanText.length >= 16) {
+                    // Fallback: Cari 16 digit berurutan dari string yang hanya berisi angka
+                    const possibleMatch = cleanText.match(/\d{16}/);
+                    if (possibleMatch) {
+                        foundNik = possibleMatch[0];
+                    }
+                }
+
+                // 4. Update UI sesuai hasil
+                if (foundNik && foundNik.length === 16) {
+                    nikInput.value = foundNik;
+                    showAlert('success', 'Berhasil! NIK ditemukan dari foto.');
+                } else {
+                    showAlert('error', 'Gagal membaca NIK dari foto (buram/tidak jelas), silakan ketik manual.');
+                }
+
+            } catch (error) {
+                console.error("Kesalahan OCR:", error);
+                showAlert('error', 'Terjadi kesalahan sistem saat memproses gambar.');
+            } finally {
+                hideLoading();
+                btnSearch.disabled = false;
+            }
+        });
+
+        // FITUR PENCARIAN DATA: Memanggil Google Apps Script API
+        btnSearch.addEventListener('click', async () => {
+            const nik = nikInput.value.trim();
+            
+            // Validasi Input
+            if (!nik) {
+                showAlert('error', 'Mohon isi NIK terlebih dahulu.');
+                return;
+            }
+
+            if (nik.length !== 16 || isNaN(nik)) {
+                showAlert('error', 'Format salah! NIK harus terdiri dari 16 digit angka.');
+                return;
+            }
+
+            // Reset state
+            hideAlerts();
+            resultCard.style.display = 'none';
+            showLoading("Mencari data ke database...");
+            btnSearch.disabled = true;
+
+            try {
+                // Fetch API GET Request
+                // (Pastikan Google Apps Script Deploy sebagai Web App dan di-set "Anyone")
+                const response = await fetch(`${APPS_SCRIPT_URL}?nik=${nik}`);
+                
+                if (!response.ok) {
+                    throw new Error("Jaringan bermasalah atau URL API salah.");
+                }
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    // Berhasil menemukan data, render ke Card
+                    const p = data.data;
+                    elNama.textContent = p.nama || '-';
+                    elNik.textContent = p.nik || '-';
+                    elResot.textContent = p.resot || '-';
+                    elAnggotaHari.textContent = p.anggota_hari || '-';
+                    
+                    // Coba format tanggal jika datanya berupa ISO String
+                    let tglText = p.tanggal;
+                    if(tglText) {
+                        try {
+                            const d = new Date(tglText);
+                            if(!isNaN(d.getTime())) {
+                                // Format ke dd/mm/yyyy
+                                tglText = d.toLocaleDateString('id-ID', {
+                                    day: '2-digit', month: 'long', year: 'numeric'
+                                });
+                            }
+                        } catch(e){}
+                    }
+                    elTanggal.textContent = tglText || '-';
+                    
+                    elAlamat.textContent = p.alamat || '-';
+                    elHp.textContent = p.no_hp || '-';
+                    elStatus.textContent = p.status || '-';
+
+                    // Update UI Status Badge
+                    if(String(p.status).toLowerCase() === 'lunas') {
+                        elStatus.style.backgroundColor = '#D1FAE5'; // emerald-100
+                        elStatus.style.color = '#059669'; // emerald-600
+                    } else {
+                        elStatus.style.backgroundColor = '#FEE2E2'; // red-100
+                        elStatus.style.color = '#DC2626'; // red-600
+                    }
+
+                    resultCard.style.display = 'block';
+                    showAlert('success', 'Data peminjam ditemukan.');
+                } else {
+                    // Data tidak ditemukan
+                    showAlert('error', 'Data NIK tidak ditemukan di database.');
+                }
+
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                showAlert('error', 'Gagal memuat data. Pastikan URL Google Apps Script sudah di-deploy dengan benar dan mendukung akses publik (CORS).');
+            } finally {
+                hideLoading();
+                btnSearch.disabled = false;
+            }
+        });
+
+        // Utility Functions
+        function showLoading(msg) {
+            loadingMsg.textContent = msg;
+            loadingIndicator.style.display = 'block';
+        }
+
+        function hideLoading() {
+            loadingIndicator.style.display = 'none';
+        }
+
+        function showAlert(type, msg) {
+            hideAlerts();
+            if (type === 'error') {
+                alertError.textContent = msg;
+                alertError.style.display = 'block';
+            } else if (type === 'success') {
+                alertSuccess.textContent = msg;
+                alertSuccess.style.display = 'block';
+            }
+        }
+
+        function hideAlerts() {
+            alertError.style.display = 'none';
+            alertSuccess.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
