@@ -600,11 +600,11 @@
 
         function unlockScreen() {
             lockOverlay.style.display = 'none';
-            // Set timer for 1 minute (60000 ms)
+            // Set timer for 60 minutes (3600000 ms)
             if(lockTimeout) clearTimeout(lockTimeout);
             lockTimeout = setTimeout(() => {
                 showLockScreen();
-            }, 60000);
+            }, 3600000);
         }
 
         btnUnlock.addEventListener('click', () => {
