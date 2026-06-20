@@ -522,6 +522,10 @@
                         <option value="BERJALAN">BERJALAN</option>
                     </select>
                 </div>
+                <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 0;">
+                    <label>Catatan Khusus</label>
+                    <textarea id="add-catatan" class="form-control" rows="2" placeholder="Tulis catatan khusus (opsional)..."></textarea>
+                </div>
             </div>
             <div style="display: flex; gap: 12px; margin-top: 24px;">
                 <button class="btn btn-secondary" id="btn-cancel-add" style="flex: 1;">Batal</button>
@@ -579,7 +583,7 @@
         // KONFIGURASI GOOGLE APPS SCRIPT URL
         // Ganti URL di bawah ini dengan URL Deployment Web App Apps Script Anda
         // ==============================================================================
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyNgmdVe2bVfOuxYSg3WuZCSCIVgJTCqUYkrpRT1ylOCJ2bCXINElydatS1QAYgfGw/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyiSY-WAz7F_0yRvbtotkN9lQudXNY1o997L1T9thH9rsVXFkoHMWgYMNxfOkSIX9s/exec';
 
         // ==============================================================================
         // FITUR LOCK SCREEN
@@ -652,6 +656,7 @@
         const elAlamat = document.getElementById('res-alamat');
         const elHp = document.getElementById('res-hp');
         const elStatus = document.getElementById('res-status');
+        const elCatatan = document.getElementById('res-catatan');
 
         // FITUR OCR: Mengunggah KTP
         fileInput.addEventListener('change', async (e) => {
@@ -779,6 +784,7 @@
                     
                     elAlamat.textContent = p.alamat || '-';
                     elHp.textContent = p.no_hp || '-';
+                    elCatatan.textContent = p.catatan || '-';
                     
                     const statusStr = String(p.status).toUpperCase().trim();
                     elStatus.textContent = statusStr || '-';
@@ -831,6 +837,7 @@
             document.getElementById('add-hp').value = '';
             document.getElementById('add-alamat').value = '';
             document.getElementById('add-status').value = 'BELUM LUNAS';
+            document.getElementById('add-catatan').value = '';
         }
 
         btnShowAddForm.addEventListener('click', () => {
@@ -855,6 +862,7 @@
                 document.getElementById('add-tanggal').value = elTanggal.dataset.raw || '';
                 document.getElementById('add-hp').value = elHp.textContent !== '-' ? elHp.textContent : '';
                 document.getElementById('add-alamat').value = elAlamat.textContent !== '-' ? elAlamat.textContent : '';
+                document.getElementById('add-catatan').value = elCatatan.textContent !== '-' ? elCatatan.textContent : '';
                 
                 // Set status
                 const currentStatus = elStatus.textContent !== '-' ? elStatus.textContent.toUpperCase() : 'BELUM LUNAS';
@@ -887,7 +895,8 @@
                 tanggal: document.getElementById('add-tanggal').value,
                 hp: document.getElementById('add-hp').value.trim(),
                 alamat: document.getElementById('add-alamat').value.trim(),
-                status: document.getElementById('add-status').value
+                status: document.getElementById('add-status').value,
+                catatan: document.getElementById('add-catatan').value.trim()
             };
 
             if(!payload.nama || !payload.resot) {
@@ -904,7 +913,8 @@
                 tanggal: payload.tanggal,
                 no_hp: payload.hp,
                 alamat: payload.alamat,
-                status: payload.status
+                status: payload.status,
+                catatan: payload.catatan
             });
 
             showLoading("Menyimpan data ke database...");

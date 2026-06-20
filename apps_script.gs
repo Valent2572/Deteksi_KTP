@@ -37,7 +37,8 @@ function doGet(e) {
           nik: data[i][5],
           alamat: data[i][6],
           no_hp: data[i][7],
-          status: data[i][8]
+          status: data[i][8],
+          catatan: data[i][9] || ''
         };
         break;
       }
@@ -72,7 +73,8 @@ function doGet(e) {
         e.parameter.nik || '',
         e.parameter.alamat || '',
         e.parameter.no_hp || '',
-        e.parameter.status || ''
+        e.parameter.status || '',
+        e.parameter.catatan || ''
       ];
       
       sheet.appendRow(newRow);
@@ -110,6 +112,7 @@ function doGet(e) {
           if(e.parameter.alamat !== undefined) sheet.getRange(rowToEdit, 7).setValue(e.parameter.alamat);
           if(e.parameter.no_hp !== undefined) sheet.getRange(rowToEdit, 8).setValue(e.parameter.no_hp);
           if(e.parameter.status !== undefined) sheet.getRange(rowToEdit, 9).setValue(e.parameter.status);
+          if(e.parameter.catatan !== undefined) sheet.getRange(rowToEdit, 10).setValue(e.parameter.catatan);
           
           edited = true;
           break;
