@@ -819,8 +819,8 @@
                 }
 
             } catch (error) {
-                console.error("Fetch Error:", error);
-                showAlert('error', 'Gagal memuat data. Pastikan URL Google Apps Script sudah di-deploy dengan benar dan mendukung akses publik (CORS).');
+                console.error(error);
+                showAlert('error', 'Gagal memuat data. Error: ' + error.message);
             } finally {
                 hideLoading();
                 btnSearch.disabled = false;
@@ -914,7 +914,8 @@
                 no_hp: payload.hp,
                 alamat: payload.alamat,
                 status: payload.status,
-                catatan: payload.catatan
+                catatan: payload.catatan,
+                _t: new Date().getTime() // Bypass cache
             });
 
             showLoading("Menyimpan data ke database...");
@@ -934,7 +935,7 @@
                 }
             } catch (err) {
                 console.error(err);
-                showAlert('error', 'Gagal menghubungi server.');
+                showAlert('error', 'Gagal menghubungi server. Error: ' + err.message);
             } finally {
                 hideLoading();
                 btnSubmitAdd.disabled = false;
